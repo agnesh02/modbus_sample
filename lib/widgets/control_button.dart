@@ -18,10 +18,13 @@ class ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: buttonStyle,
-      onPressed: onClick,
-      child: Text(title),
+    return SizedBox(
+      width: 250,
+      child: ElevatedButton(
+        style: buttonStyle,
+        onPressed: onClick,
+        child: Text(title),
+      ),
     );
   }
 }
