@@ -1,10 +1,3 @@
-// export 'src/modbus_client.dart';
-// export 'src/modbus_request.dart';
-// export 'src/modbus_element.dart';
-// export 'src/modbus_element_group.dart';
-// export 'src/modbus_app_logger.dart';
-// export 'src/modbus_file_record.dart';
-
 /// The Modbus standard function codes.
 enum ModbusFunctionCode {
   readCoils(0x01),
@@ -18,17 +11,6 @@ enum ModbusFunctionCode {
 
   const ModbusFunctionCode(this.code);
   final int code;
-
-  bool get isRead => isReadFunction(code);
-  bool get isWrite => isWriteFunction(code);
-  bool get isWriteSingle => isWriteSingleFunction(code);
-  bool get isWriteMultiple => isWriteMultipleFunction(code);
-
-  static bool isReadFunction(code) => 0x00 < code && code <= 0x04;
-  static bool isWriteFunction(code) => 0x04 < code && code <= 0x10;
-  static bool isWriteSingleFunction(code) => code == 0x05 || code == 0x06;
-  static bool isWriteMultipleFunction(code) => code == 0x0F || code == 0x10;
-  static bool isSpecialFunction(code) => code > 0x10;
 }
 
 /// The Modbus response codes.
@@ -79,21 +61,6 @@ enum ModbusResponseCode {
   factory ModbusResponseCode.fromCode(int code) =>
       values.singleWhere((e) => code == e.code,
           orElse: () => ModbusResponseCode.undefinedErrorCode);
-}
-
-/// The connection mode used when sending a request.
-enum ModbusConnectionMode {
-  /// Requires manual connection of the client before sending requests.
-  /// Sending the request will fail if client is not connected.
-  doNotConnect,
-
-  /// Client will be connected if not already before sending the
-  /// requests. After request has been sent, client is disconnected.
-  autoConnectAndDisconnect,
-
-  /// Client will be connected if not already before sending the
-  /// requests. After request has been sent, client is disconnected.
-  autoConnectAndKeepConnected,
 }
 
 /// The modbus_client package base [Exception] class.
