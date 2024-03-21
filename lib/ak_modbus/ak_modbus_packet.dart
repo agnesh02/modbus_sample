@@ -1,7 +1,9 @@
 // ignore_for_file: avoid_print
 
+// ignore: unused_import
 import 'dart:typed_data';
 
+// ignore: unused_import
 import 'package:crclib/catalog.dart';
 
 class AkModbusPacket {
@@ -44,9 +46,12 @@ class AkModbusPacket {
         'Byte count: $byteCount |  0x${byteCount.toRadixString(16)}',
       );
     }
-    print(
-      'Data Frame: $dataFrame | ${dataFrame.map((e) => "0x${e.toRadixString(16)}").toList()}',
-    );
+    if (dataFrame.isNotEmpty) {
+      print(
+        'Data Frame: $dataFrame | ${dataFrame.map((e) => "0x${e.toRadixString(16)}").toList()}',
+      );
+    }
+
     print(
         'CRC Checksum: $crcChecksum | ${crcChecksum.map((e) => "0x${e.toRadixString(16)}").toList()}');
     print('-------------------------------------------------');
@@ -58,12 +63,16 @@ class AkModbusPacket {
     packet.add(fnCode);
     packet.addAll(registerAddress);
     if (quantity.isNotEmpty) {
+      // Check not necessary as list will be empty. but writing for clarification
       packet.addAll(quantity);
     }
     if (byteCount != 0) {
       packet.add(byteCount);
     }
-    packet.addAll(dataFrame);
+    if (dataFrame.isNotEmpty) {
+      // Check not necessary as list will be empty. but writing for clarification
+      packet.addAll(dataFrame);
+    }
     packet.addAll(crcChecksum);
     return packet;
   }
@@ -74,61 +83,65 @@ class AkModbusPacket {
     pduWithSlaveAddress.add(fnCode);
     pduWithSlaveAddress.addAll(registerAddress);
     if (quantity.isNotEmpty) {
+      // Check not necessary as list will be empty. but writing for clarification
       pduWithSlaveAddress.addAll(quantity);
     }
     if (byteCount != 0) {
       pduWithSlaveAddress.add(byteCount);
     }
-    pduWithSlaveAddress.addAll(dataFrame);
+    if (dataFrame.isNotEmpty) {
+      // Check not necessary as list will be empty. but writing for clarification
+      pduWithSlaveAddress.addAll(dataFrame);
+    }
     return pduWithSlaveAddress;
   }
 
-  static void createAndPrintMessage({
-    required int slaveAddress,
-    required int fnCode,
-    required int regOffset,
-    required List<int> dataFrame,
-    required int numberOfReg,
-  }) {
-    List<int> newList = [];
-    newList.add(slaveAddress);
-    newList.add(fnCode);
+  // static void createAndPrintMessage({
+  //   required int slaveAddress,
+  //   required int fnCode,
+  //   required int regOffset,
+  //   required List<int> dataFrame,
+  //   required int numberOfReg,
+  // }) {
+  //   List<int> newList = [];
+  //   newList.add(slaveAddress);
+  //   newList.add(fnCode);
 
-    newList.add(int.parse(
-        regOffset.toRadixString(16).padLeft(4, '0').toString().substring(0, 2),
-        radix: 16));
-    newList.add(int.parse(
-        regOffset.toRadixString(16).padLeft(4, '0').toString().substring(2, 4),
-        radix: 16));
+  //   newList.add(int.parse(
+  //       regOffset.toRadixString(16).padLeft(4, '0').toString().substring(0, 2),
+  //       radix: 16));
+  //   newList.add(int.parse(
+  //       regOffset.toRadixString(16).padLeft(4, '0').toString().substring(2, 4),
+  //       radix: 16));
 
-    newList.add(int.parse(
-        numberOfReg
-            .toRadixString(16)
-            .padLeft(4, '0')
-            .toString()
-            .substring(0, 2),
-        radix: 16));
-    newList.add(int.parse(
-        numberOfReg
-            .toRadixString(16)
-            .padLeft(4, '0')
-            .toString()
-            .substring(2, 4),
-        radix: 16));
+  //   newList.add(int.parse(
+  //       numberOfReg
+  //           .toRadixString(16)
+  //           .padLeft(4, '0')
+  //           .toString()
+  //           .substring(0, 2),
+  //       radix: 16));
+  //   newList.add(int.parse(
+  //       numberOfReg
+  //           .toRadixString(16)
+  //           .padLeft(4, '0')
+  //           .toString()
+  //           .substring(2, 4),
+  //       radix: 16));
 
-    newList.addAll(dataFrame);
+  //   newList.addAll(dataFrame);
 
-    var crc = Crc16Modbus().convert(Uint8List.fromList(newList));
-    final checksum =
-        int.parse(crc.toString()).toRadixString(16).padLeft(4, '0');
+  //   var crc = Crc16Modbus().convert(Uint8List.fromList(newList));
+  //   final checksum =
+  //       int.parse(crc.toString()).toRadixString(16).padLeft(4, '0');
 
-    print("Checksum SIBY $checksum");
+  //   print("Checksum SIBY $checksum");
 
-    newList.add(int.parse(checksum.toString().substring(2, 4).toUpperCase(),
-        radix: 16));
-    newList.add(int.parse(checksum.toString().substring(0, 2).toUpperCase(),
-        radix: 16));
+  //   newList.add(int.parse(checksum.toString().substring(2, 4).toUpperCase(),
+  //       radix: 16));
+  //   newList.add(int.parse(checksum.toString().substring(0, 2).toUpperCase(),
+  //       radix: 16));
 
-    print("SIBY: $newList");
-  }
+  //   print("SIBY: $newList");
+  // }
 }

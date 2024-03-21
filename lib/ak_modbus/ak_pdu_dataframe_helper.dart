@@ -3,6 +3,7 @@
 import 'dart:typed_data';
 
 import 'package:crclib/catalog.dart';
+import 'package:modbus_sample/ak_modbus/ak_modbus_codes.dart';
 
 class AkPduDataFrameHelper {
   AkPduDataFrameHelper._();
@@ -11,6 +12,146 @@ class AkPduDataFrameHelper {
 
   factory AkPduDataFrameHelper() {
     return _instance;
+  }
+
+  void decodeResponse(List<int> receivedData) {
+    int slaveAddress = receivedData[0];
+    int fnCode = receivedData[1];
+
+    if (fnCode == ModbusFunctionCode.readHoldingRegisters.code) {
+      int numberOfBytes = receivedData[2];
+      // We are incrementing it first in the loop
+      // We need this to get start index of data as well as checksum
+      int requiredStartIndex = 3;
+      List<int> dataContent = [];
+      List<int> crcChecksum = [];
+
+      for (int i = 0; i < numberOfBytes; i++) {
+        dataContent.add(receivedData[requiredStartIndex++]);
+      }
+
+      crcChecksum.add(receivedData[requiredStartIndex]);
+      crcChecksum.add(receivedData[requiredStartIndex + 1]);
+
+      print(
+        "-------DECODED DATA--------${ModbusFunctionCode.readHoldingRegisters}----",
+      );
+      printDecodedProperties(
+        slaveAddress: slaveAddress,
+        fnCode: fnCode,
+        byteCount: numberOfBytes,
+        dataFrame: dataContent,
+        crcChecksum: crcChecksum,
+      );
+
+      var pduWithSlaveAddress = getPduWithSlaveAddress(
+        slaveAddress: slaveAddress,
+        fnCode: fnCode,
+        byteCount: numberOfBytes,
+        dataFrame: dataContent,
+      );
+
+      print("<==========RECHECKING CHECKSUM==============>");
+      generateCheckSum(pduWithSlaveAddress);
+    } else if (fnCode == ModbusFunctionCode.readCoils.code) {
+      int numberOfBytes = receivedData[2];
+      // We are incrementing it first in the loop
+      // We need this to get start index of data as well as checksum
+      int requiredStartIndex = 3;
+      List<int> dataContent = [];
+      List<int> crcChecksum = [];
+
+      for (int i = 0; i < numberOfBytes; i++) {
+        dataContent.add(receivedData[requiredStartIndex++]);
+      }
+
+      crcChecksum.add(receivedData[requiredStartIndex]);
+      crcChecksum.add(receivedData[requiredStartIndex + 1]);
+
+      print(
+        "-------DECODED DATA--------${ModbusFunctionCode.readCoils}----",
+      );
+      printDecodedProperties(
+        slaveAddress: slaveAddress,
+        fnCode: fnCode,
+        byteCount: numberOfBytes,
+        dataFrame: dataContent,
+        crcChecksum: crcChecksum,
+      );
+
+      var pduWithSlaveAddress = getPduWithSlaveAddress(
+        slaveAddress: slaveAddress,
+        fnCode: fnCode,
+        byteCount: numberOfBytes,
+        dataFrame: dataContent,
+      );
+
+      print("<==========RECHECKING CHECKSUM==============>");
+      generateCheckSum(pduWithSlaveAddress);
+
+      print("<==========COIL DATA==============>");
+      for (int value in dataContent) {
+        hexToBinary(value);
+      }
+    }
+  }
+
+  void hexToBinary(int value) {
+    int intValue = value;
+    String binaryString = intValue.toRadixString(2);
+    // List<int> binaryArray =
+    //     binaryString.padLeft(8, '0').split('').map(int.parse).toList();
+    List<String> binaryDigits = binaryString.padLeft(8, '0').split('');
+    List<int> binaryArray = binaryDigits.map((String digit) {
+      return int.parse(digit);
+    }).toList();
+    print("$value -> $binaryArray");
+  }
+
+  List<int> getPduWithSlaveAddress({
+    required int slaveAddress,
+    required int fnCode,
+    required int byteCount,
+    required List<int> dataFrame,
+  }) {
+    List<int> pduWithSlaveAddress = [];
+    pduWithSlaveAddress.add(slaveAddress);
+    pduWithSlaveAddress.add(fnCode);
+    pduWithSlaveAddress.add(byteCount);
+    pduWithSlaveAddress.addAll(dataFrame);
+
+    return pduWithSlaveAddress;
+  }
+
+  void printDecodedProperties({
+    required int slaveAddress,
+    required int fnCode,
+    required int byteCount,
+    required List<int> dataFrame,
+    required List<int> crcChecksum,
+  }) {
+    print('-----------------DETAILS-------------------');
+    print(
+      'Slave Address: $slaveAddress  | 0x${slaveAddress.toRadixString(16)}',
+    );
+    print(
+      'Function Code: $fnCode | 0x${fnCode.toRadixString(16)}',
+    );
+
+    if (byteCount != 0) {
+      print(
+        'Byte count: $byteCount |  0x${byteCount.toRadixString(16)}',
+      );
+    }
+    if (dataFrame.isNotEmpty) {
+      print(
+        'Data Frame: $dataFrame | ${dataFrame.map((e) => "0x${e.toRadixString(16)}").toList()}',
+      );
+    }
+
+    print(
+        'CRC Checksum: $crcChecksum | ${crcChecksum.map((e) => "0x${e.toRadixString(16)}").toList()}');
+    print('-------------------------------------------------');
   }
 
   List<int> generateWriteSingleRegisterFrame(int data) {

@@ -58,4 +58,34 @@ class AkModbusHelper {
     print(packet.getPacket());
     print("---------------------------------");
   }
+
+  void performReadOperation({
+    required int slaveAddress,
+    required int fnCode,
+    required List<int> registerAddress,
+    List<int>? quantity,
+  }) {
+    var packet = AkModbusPacket(
+      slaveAddress: slaveAddress,
+      fnCode: fnCode,
+      registerAddress: registerAddress,
+      quantity: quantity ?? [],
+      byteCount: 0,
+      dataFrame: [],
+      crcChecksum: [],
+    );
+
+    // Set CRC checksum
+    packet.crcChecksum = AkPduDataFrameHelper().generateCheckSum(
+      packet.getPduWithSlaveAddress(),
+    );
+
+    // Print properties
+    packet.printAllProperties();
+
+    // Print final packet
+    print("-----Printing final packet-------");
+    print(packet.getPacket());
+    print("---------------------------------");
+  }
 }
