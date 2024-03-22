@@ -30,6 +30,16 @@ class AkPduDataFrameHelper {
         dataContent.add(receivedData[requiredStartIndex++]);
       }
 
+      List<int> combinedValues = [];
+      for (int i = 0; i < dataContent.length; i += 2) {
+        if (i + 1 < dataContent.length) {
+          int combined = (dataContent[i] << 8) | dataContent[i + 1];
+          combinedValues.add(combined);
+        }
+      }
+
+      dataContent = combinedValues;
+
       crcChecksum.add(receivedData[requiredStartIndex]);
       crcChecksum.add(receivedData[requiredStartIndex + 1]);
 
@@ -185,12 +195,18 @@ class AkPduDataFrameHelper {
         bytes.insert(0, data & 0xFF);
         data >>= 8;
       }
+
+      // Pad the byte array to ensure it has at least 2 bytes
+      while (bytes.length < 2) {
+        bytes.insert(0, 0);
+      }
+
       arrayOfBytes.addAll(bytes);
       print("Data as byte array: $d -> $bytes");
     }
 
     for (var byte in arrayOfBytes) {
-      String byteAsHex = "0x$byte";
+      String byteAsHex = "0x${byte.toRadixString(16).padLeft(2, '0')}";
       arrayOfHexData.add(byteAsHex);
     }
 

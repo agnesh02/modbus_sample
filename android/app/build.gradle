@@ -58,6 +58,16 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    //  signingConfigs {
+    //     debug {
+    //         storeFile file("debug.keystore")
+    //         storePassword "123456"
+    //         keyAlias "androiddebugkey"
+    //         keyPassword "123456"
+    //     }
+    // }
+    
 }
 
 flutter {
